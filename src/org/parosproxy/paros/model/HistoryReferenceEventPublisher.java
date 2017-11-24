@@ -57,6 +57,11 @@ public final class HistoryReferenceEventPublisher implements EventPublisher {
     public static final String EVENT_NOTE_SET = "href.note.set";
 
     /**
+     * The event sent when a color has been (re)set to a {@code HistoryReference}.
+     */
+    public static final String EVENT_COLOR_SET = "href.color.set";
+
+    /**
      * The event's field that contains the ID of the {@code HistoryReference} of the event.
      */
     public static final String FIELD_HISTORY_REFERENCE_ID = "historyReferenceId";
@@ -85,7 +90,7 @@ public final class HistoryReferenceEventPublisher implements EventPublisher {
             publisher = new HistoryReferenceEventPublisher();
             ZAP.getEventBus().registerPublisher(
                     publisher,
-                    new String[] { EVENT_TAG_ADDED, EVENT_TAG_REMOVED, EVENT_TAGS_SET, EVENT_NOTE_SET, EVENT_REMOVED });
+                    new String[] { EVENT_TAG_ADDED, EVENT_TAG_REMOVED, EVENT_TAGS_SET, EVENT_NOTE_SET, EVENT_REMOVED, EVENT_COLOR_SET });
         }
     }
 }

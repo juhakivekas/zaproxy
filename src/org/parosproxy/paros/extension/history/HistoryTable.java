@@ -20,7 +20,9 @@
 package org.parosproxy.paros.extension.history;
 
 import org.parosproxy.paros.Constant;
+import org.parosproxy.paros.control.Control;
 import org.zaproxy.zap.view.table.HistoryReferencesTable;
+import org.zaproxy.zap.view.table.decorator.MarkItemColorHighlighter;
 
 /**
  * A {@code HistoryReferencesTable} for History tab.
@@ -38,10 +40,14 @@ class HistoryTable extends HistoryReferencesTable {
         setAutoCreateColumnsFromModel(false);
 
         setName("History Table");
-
         getColumnExt(Constant.messages.getString("view.href.table.header.timestamp.response")).setVisible(false);
         getColumnExt(Constant.messages.getString("view.href.table.header.size.requestheader")).setVisible(false);
         getColumnExt(Constant.messages.getString("view.href.table.header.size.requestbody")).setVisible(false);
         getColumnExt(Constant.messages.getString("view.href.table.header.size.responseheader")).setVisible(false);
+
+        //Add a highlighter for marking rows of the history table with colours
+        ExtensionHistory extHistory = (ExtensionHistory) Control.getSingleton().getExtensionLoader().getExtension(ExtensionHistory.NAME);
+        int idColumnIndex = ((HistoryTableModel) this.dataModel).getColumnIndex(HistoryTableModel.Column.HREF_ID);
+        this.setHighlighters(new MarkItemColorHighlighter(extHistory, idColumnIndex));
     }
 }

@@ -327,7 +327,8 @@ public class SqlTableHistory extends SqlAbstractTable implements TableHistory {
 							resBody,
 			                rs.getString(TAG),
 			                rs.getString(NOTE),			// ZAP: Added note
-			                rs.getBoolean(RESPONSE_FROM_TARGET_HOST)
+			                rs.getBoolean(RESPONSE_FROM_TARGET_HOST),
+							0
 					);
 				}
 			} finally {
@@ -785,6 +786,11 @@ public class SqlTableHistory extends SqlAbstractTable implements TableHistory {
 			DbSQL.getSingleton().releasePreparedStatement(psUpdateNote);
 		}
     }
+
+	@Override
+	public void updateColor(int historyId, int color) throws DatabaseException {
+		//TODO
+	}
 
     /* (non-Javadoc)
 	 * @see org.parosproxy.paros.db.TbleHistoryIf#lastIndex()

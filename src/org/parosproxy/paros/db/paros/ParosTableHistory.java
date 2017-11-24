@@ -89,6 +89,8 @@ public class ParosTableHistory extends ParosAbstractTable implements TableHistor
     // ZAP: Added NOTE field to history table
     private static final String NOTE        = "NOTE";
     private static final String RESPONSE_FROM_TARGET_HOST = "RESPONSEFROMTARGETHOST";
+	// ZAP: Added message color support
+	private static final String COLOR       = "COLOR";
 
     private PreparedStatement psRead = null;
     private PreparedStatement psInsert = null;
@@ -99,6 +101,7 @@ public class ParosTableHistory extends ParosAbstractTable implements TableHistor
     //private PreparedStatement psAlterTable = null;
 //    private PreparedStatement psUpdateTag = null;
     private PreparedStatement psUpdateNote = null;
+	private PreparedStatement psUpdateColor = null;
     
     private int lastInsertedIndex;
     
@@ -147,15 +150,15 @@ public class ParosTableHistory extends ParosAbstractTable implements TableHistor
 			            + SESSIONID + "," + HISTTYPE + "," + TIMESENTMILLIS + "," + 
 			            TIMEELAPSEDMILLIS + "," + METHOD + "," + URI + "," + REQHEADER + "," + 
 			            REQBODY + "," + RESHEADER + "," + RESBODY + "," + TAG + ", " + STATUSCODE + "," + NOTE + ", " +
-			            RESPONSE_FROM_TARGET_HOST
-			            + ") VALUES (?, ? ,?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?)");
+			            RESPONSE_FROM_TARGET_HOST + "," + COLOR
+			            + ") VALUES (?, ? ,?, ?, ?, ?, ?, ? ,? , ?, ?, ?, ?, ?, ?)");
 			} else {
 			    psInsert = conn.prepareStatement("INSERT INTO HISTORY ("
 			            + SESSIONID + "," + HISTTYPE + "," + TIMESENTMILLIS + "," + 
 			            TIMEELAPSEDMILLIS + "," + METHOD + "," + URI + "," + REQHEADER + "," + 
 			            REQBODY + "," + RESHEADER + "," + RESBODY + "," + TAG + "," + NOTE + ", " +
-			            RESPONSE_FROM_TARGET_HOST
-			            + ") VALUES (?, ? ,?, ?, ?, ?, ?, ? ,? , ? , ?, ?, ?)");
+			            RESPONSE_FROM_TARGET_HOST + "," + COLOR
+			            + ") VALUES (?, ? ,?, ?, ?, ?, ?, ? ,? , ? , ?, ?, ?, ?)");
 			    
 			}
 			psGetIdLastInsert = conn.prepareCall("CALL IDENTITY();");
@@ -163,6 +166,7 @@ public class ParosTableHistory extends ParosAbstractTable implements TableHistor
 //        psUpdateTag = conn.prepareStatement("UPDATE HISTORY SET TAG = ? WHERE HISTORYID = ?");
 
 			psUpdateNote = conn.prepareStatement("UPDATE HISTORY SET NOTE = ? WHERE HISTORYID = ?");
+			psUpdateColor = conn.prepareStatement("UPDATE HISTORY SET COLOR = ? WHERE HISTORYID = ?");
 			
 			int currentIndex = 0;
 			PreparedStatement stmt = null;
@@ -243,6 +247,11 @@ public class ParosTableHistory extends ParosAbstractTable implements TableHistor
 				log.error("The SQL Exception was:", e);
 				throw e;
 			}
+
+			// Add the COLOR column to the db if necessary
+			if (!DbUtils.hasColumn(connection, TABLE_NAME, COLOR)) {
+				DbUtils.executeAndClose(connection.prepareStatement("ALTER TABLE "+TABLE_NAME+" ADD COLUMN "+COLOR+" INTEGER DEFAULT 0"));
+			}
 		} catch (SQLException e) {
 			throw new DatabaseException(e);
 		}
@@ -276,6 +285,7 @@ public class ParosTableHistory extends ParosAbstractTable implements TableHistor
 			String uri = "";
 			int statusCode = 0;
 			String note = msg.getNote();
+			int color = msg.getColor();
 			
 			if (!msg.getRequestHeader().isEmpty()) {
 			    reqHeader = msg.getRequestHeader().toString();
@@ -291,7 +301,7 @@ public class ParosTableHistory extends ParosAbstractTable implements TableHistor
 			}
 			
 			//return write(sessionId, histType, msg.getTimeSentMillis(), msg.getTimeElapsedMillis(), method, uri, statusCode, reqHeader, reqBody, resHeader, resBody, msg.getTag());
-			return write(sessionId, histType, msg.getTimeSentMillis(), msg.getTimeElapsedMillis(), method, uri, statusCode, reqHeader, reqBody, resHeader, resBody, null, note, msg.isResponseFromTargetHost());
+			return write(sessionId, histType, msg.getTimeSentMillis(), msg.getTimeElapsedMillis(), method, uri, statusCode, reqHeader, reqBody, resHeader, resBody, null, note, msg.isResponseFromTargetHost(), color);
 		} catch (SQLException e) {
 			throw new DatabaseException(e);
 		}
@@ -300,7 +310,7 @@ public class ParosTableHistory extends ParosAbstractTable implements TableHistor
 	
 	private synchronized RecordHistory write(long sessionId, int histType, long timeSentMillis, int timeElapsedMillis,
 	        String method, String uri, int statusCode,
-	        String reqHeader, byte[] reqBody, String resHeader, byte[] resBody, String tag, String note, boolean responseFromTargetHost) 
+	        String reqHeader, byte[] reqBody, String resHeader, byte[] resBody, String tag, String note, boolean responseFromTargetHost, int color)
 	        		throws HttpMalformedHeaderException, SQLException, DatabaseException {
 
 		//ZAP: Allow the request and response body sizes to be user-specifiable as far as possible
@@ -345,6 +355,9 @@ public class ParosTableHistory extends ParosAbstractTable implements TableHistor
         ++currentIdx;
         
         psInsert.setBoolean(currentIdx, responseFromTargetHost);
+		++currentIdx;
+
+		psInsert.setInt(currentIdx, color);
         
         psInsert.executeUpdate();
 				
@@ -392,7 +405,8 @@ public class ParosTableHistory extends ParosAbstractTable implements TableHistor
 						resBody,
 	                    rs.getString(TAG),
 	                    rs.getString(NOTE),			// ZAP: Added note
-                        rs.getBoolean(RESPONSE_FROM_TARGET_HOST)
+                        rs.getBoolean(RESPONSE_FROM_TARGET_HOST),
+						rs.getInt(COLOR)
 				);
 			}
 		} finally {
@@ -875,6 +889,17 @@ public class ParosTableHistory extends ParosAbstractTable implements TableHistor
 			throw new DatabaseException(e);
 		}
     }
+
+	//@Override
+	public synchronized void updateColor(int historyId, int color) throws DatabaseException {
+		try {
+			psUpdateColor.setInt(1, color);
+			psUpdateColor.setInt(2, historyId);
+			psUpdateColor.execute();
+		} catch (SQLException e) {
+			throw new DatabaseException(e);
+		}
+	}
 
     @Override
     public int lastIndex () {

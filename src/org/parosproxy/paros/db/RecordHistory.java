@@ -45,7 +45,7 @@ public class RecordHistory {
 	}
 
 	// ZAP: Added note to RecordHistory constructor
-	public RecordHistory(int historyId, int historyType, long sessionId, long timeSentMillis, int timeElapsedMillis, String reqHeader, byte[] reqBody, String resHeader, byte[] resBody, String tag, String note, boolean responseFromTargetHost) throws HttpMalformedHeaderException {
+	public RecordHistory(int historyId, int historyType, long sessionId, long timeSentMillis, int timeElapsedMillis, String reqHeader, byte[] reqBody, String resHeader, byte[] resBody, String tag, String note, boolean responseFromTargetHost, int color) throws HttpMalformedHeaderException {
 		setHistoryId(historyId);
 		setHistoryType(historyType);
         setSessionId(sessionId);
@@ -54,6 +54,7 @@ public class RecordHistory {
 		httpMessage.setTimeElapsedMillis(timeElapsedMillis);
         httpMessage.setNote(note);
         httpMessage.setResponseFromTargetHost(responseFromTargetHost);
+		httpMessage.setColor(color);
 	}
 	
 	/**

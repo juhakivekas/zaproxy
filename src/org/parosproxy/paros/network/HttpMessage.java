@@ -100,6 +100,8 @@ public class HttpMessage implements Message {
 	private User requestUser;
 	// Can be set by scripts to force a break
 	private boolean forceIntercept = false;
+	// ZAP: Added support for history colouring
+	private int color = 0;
 
     /**
      * Flag that indicates if the response has been received or not from the target host.
@@ -743,6 +745,20 @@ public class HttpMessage implements Message {
     public void setNote(String note) {
         this.note = note;
     }
+
+	/**
+	 * @return Returns the coloring of this message.
+	 */
+	public int getColor() {
+		return color;
+	}
+
+	/**
+	 * @param color The color to set.
+	 */
+	public void setColor(int color) {
+		this.color = color;
+	}
 
 	public void mutateHttpMethod(String method) {
 		// String header = reqPanel.getTxtHeader().getText();

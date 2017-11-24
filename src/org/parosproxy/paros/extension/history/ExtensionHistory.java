@@ -900,6 +900,7 @@ public class ExtensionHistory extends ExtensionAdaptor implements SessionChanged
             case HistoryReferenceEventPublisher.EVENT_TAG_ADDED:
             case HistoryReferenceEventPublisher.EVENT_TAG_REMOVED:
             case HistoryReferenceEventPublisher.EVENT_TAGS_SET:
+            case HistoryReferenceEventPublisher.EVENT_COLOR_SET:
                 notifyHistoryItemChanged(
                         Integer.valueOf(event.getParameters().get(HistoryReferenceEventPublisher.FIELD_HISTORY_REFERENCE_ID)));
                 break;

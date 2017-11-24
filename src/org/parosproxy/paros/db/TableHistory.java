@@ -136,6 +136,8 @@ public interface TableHistory extends DatabaseListener {
 	void updateNote(int historyId, String note)
 			throws DatabaseException;
 
+	void updateColor(int historyId, int color) throws DatabaseException;
+
 	int lastIndex();
 
 }

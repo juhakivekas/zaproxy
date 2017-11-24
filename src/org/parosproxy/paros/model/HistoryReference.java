@@ -582,7 +582,7 @@ public class HistoryReference {
 	public List<String> getTags() {
 		return this.tags;
 	}
-   
+
    // ZAP: Added setNote method to HistoryReference
    public void setNote(String note) {
        try {
@@ -594,6 +594,17 @@ public class HistoryReference {
        }
        
    }
+
+	// ZAP: Added color support for messages
+	public void setColor(int color) {
+		try {
+			staticTableHistory.updateColor(historyId, color);
+			notifyEvent(HistoryReferenceEventPublisher.EVENT_COLOR_SET);
+		} catch (DatabaseException e) {
+			log.error(e.getMessage(), e);
+		}
+
+	}
    
    public void loadAlerts() {
 		// ZAP: Support for loading the alerts from the db
